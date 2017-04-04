@@ -1,4 +1,13 @@
-FROM centos:centos7.2.1511
+FROM centos:centos7.3.1611
+
+# Charset env vars
+ENV CHARSET_VAR=UTF-8
+ENV LOCALE_VAR=en_US
+
+ENV LANG=${LOCALE_VAR}.${CHARSET_VAR}
+ENV LANGUAGE=${LOCALE_VAR}.${CHARSET_VAR}
+ENV LC_COLLATE=${LOCALE_VAR}
+ENV LC_CTYPE=${LOCALE_VAR}.${CHARSET_VAR}
 
 # Java Env Variables
 ENV JAVA_VERSION=1.8.0_111
@@ -12,10 +21,10 @@ ENV SWARM_PASSWORD=jenkins
 
 # Slave Env Variables
 ENV SLAVE_NAME="Swarm_Slave"
-ENV SLAVE_LABELS="docker aws ldap"
+ENV SLAVE_LABELS="java ftp aws ldap"
 ENV SLAVE_MODE="exclusive"
 ENV SLAVE_EXECUTORS=1
-ENV SLAVE_DESCRIPTION="Core Jenkins Slave"
+ENV SLAVE_DESCRIPTION="Jenkins Slave"
 
 # Pre-requisites
 RUN yum -y install epel-release
@@ -28,15 +37,16 @@ RUN yum install -y which \
     openldap-clients \
     openssl \
     python-pip \
-    libxslt && \
+    libxslt \
+    ftp && \
     yum clean all 
 
-RUN pip install awscli==1.10.19
+RUN pip install awscli==1.11.68
 
 # Docker versions Env Variables
 ENV DOCKER_ENGINE_VERSION=1.13.1-1.el7.centos
-ENV DOCKER_COMPOSE_VERSION=1.10.0
-ENV DOCKER_MACHINE_VERSION=v0.9.0
+ENV DOCKER_COMPOSE_VERSION=1.11.2
+ENV DOCKER_MACHINE_VERSION=v0.10.0
 
 RUN curl -fsSL https://get.docker.com/ | sed "s/docker-engine/docker-engine-${DOCKER_ENGINE_VERSION}/" | sh
 
@@ -54,7 +64,7 @@ RUN wget -q --no-check-certificate --directory-prefix=/tmp \
             alternatives --install /usr/bin/java java /opt/java/jdk${JAVA_VERSION}/bin/java 100 && \
                 rm -rf /tmp/* && rm -rf /var/log/*
 
-# Make Jenkins a slave by installing swarm-client
+# Make a Jenkins slave by installing swarm-client
 RUN curl -s -o /bin/swarm-client.jar -k http://repo.jenkins-ci.org/releases/org/jenkins-ci/plugins/swarm-client/2.0/swarm-client-2.0-jar-with-dependencies.jar
 
 # Start Swarm-Client
