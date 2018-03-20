@@ -39,7 +39,14 @@ ENV DOCKER_ENGINE_VERSION=1.10.3-1.el7.centos
 ENV DOCKER_COMPOSE_VERSION=1.6.0
 ENV DOCKER_MACHINE_VERSION=v0.6.0
 
-RUN curl -fsSL https://get.docker.com/ | sed "s/docker-engine/docker-engine-${DOCKER_ENGINE_VERSION}/" | sh
+RUN echo $'[dockerrepo] \n\
+name=Docker Repository \n\
+baseurl=https://yum.dockerproject.org/repo/main/centos/7/ \n\
+enabled=1 \n\
+gpgcheck=1 \n\
+gpgkey=https://yum.dockerproject.org/gpg' > /etc/yum.repos.d/docker.repo
+
+RUN yum install -y docker-engine-${DOCKER_ENGINE_VERSION}.x86_64
 
 RUN curl -L https://github.com/docker/compose/releases/download/${DOCKER_COMPOSE_VERSION}/docker-compose-`uname -s`-`uname -m` > /usr/local/bin/docker-compose && \
     chmod +x /usr/local/bin/docker-compose
